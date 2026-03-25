@@ -16,3 +16,8 @@ export const register = async (data: {
   const res = await client.post("/auth/register", data)
   return res.data
 }
+
+export const forgotPassword = async (email: string) => {
+  const res = await client.post("/auth/forgot-password", { email })
+  return res.data
+}
