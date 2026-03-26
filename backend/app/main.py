@@ -12,3 +12,7 @@ app.include_router(users.router, prefix="/api/v1")
 app.include_router(posts.router, prefix="/api/v1")
 app.include_router(comments.router, prefix="/api/v1")
 app.include_router(likes.router, prefix="/api/v1")
+
+@app.get("/")
+def root():
+    return {"message": "API is running"}
