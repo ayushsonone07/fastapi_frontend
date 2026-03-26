@@ -35,8 +35,8 @@ export const useLogin = () => {
 
 export const useRegister = () => {
   return useMutation({
-    mutationFn: ({ username, email, password }: RegisterPayload) =>
-      register(username, email, password),
+    mutationFn: (payload: RegisterPayload) =>
+      register(payload),
 
     onSuccess: (data) => {
       // Automatically log the user in after successful registration
