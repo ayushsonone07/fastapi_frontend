@@ -16,25 +16,37 @@ router = APIRouter()
 def register(user: UserCreate, db: Session = Depends(get_db)):
     return create_user(db, user.username, user.email, user.password)
 
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.schemas.user import UserCreate
+from app.services.auth_service import create_user, authenticate_user
+from app.core.security import create_access_token
+from app.core.dependencies import get_db
+from pydantic import BaseModel
+from fastapi import HTTPException, status   # ← add this
 
-# @router.post("/auth/login")
-# def login(data: LoginRequest, db: Session = Depends(get_db)):
-#     user = authenticate_user(db, data.email, data.password)
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
-#     if not user:
-#         return {"error": "Invalid credentials"}
+router = APIRouter()
 
-#     token = create_access_token({"sub": str(user.id)})
-#     return {"access_token": token}
+@router.post("/auth/register")
+def register(user: UserCreate, db: Session = Depends(get_db)):
+    return create_user(db, user.username, user.email, user.password)
+
 
 @router.post("/auth/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = authenticate_user(db, data.email, data.password)
 
     if not user:
-        return {"error": "Invalid credentials"}
+        raise HTTPException(                          # ← raise instead of plain dict
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
 
-    token = create_access_token({"sub": str(user.id)})
+    token = create_access_token({"sub": user.id})    # ← removed str() here
 
     return {
         "access_token": token,
