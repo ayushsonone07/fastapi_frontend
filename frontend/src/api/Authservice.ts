@@ -14,15 +14,16 @@ const authService = {
   },
 
   // POST /auth/login  — FastAPI OAuth2 expects form-encoded body
-  async login({ email, password } : { email: string, password: string }) {
-    const form = new URLSearchParams();
-    form.append("username", email); // FastAPI OAuth2 uses "username" field
-    form.append("password", password);
-    const { data } = await apiClient.post("/auth/login", form, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  // POST /auth/login
+  async login({ email, password }: { email: string; password: string }) {
+    const { data } = await apiClient.post("/auth/login", {
+      email,
+      password,
     });
+
     _saveTokens(data);
-    return data.user;
+
+    return this.getMe();
   },
 
   // GET /users/me
