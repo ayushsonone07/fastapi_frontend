@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
-import { login, register, forgotPassword } from "../api/auth"
+import { login, register, forgotPassword } from "../api/Authservice"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
