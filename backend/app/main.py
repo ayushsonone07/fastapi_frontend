@@ -11,6 +11,7 @@ app.add_middleware(
     allow_origins=[
     "http://localhost:5173",                    # Vite dev server
     "https://social-frontend-eta.vercel.app/",         # your deployed frontend
+    "https://vm-p1nt2yf09m2pn6wjzagnr8.vusercontent.net/login",
     ],
     allow_credentials=True,
     allow_methods=["*"],
