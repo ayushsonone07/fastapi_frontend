@@ -5,13 +5,13 @@ const socialService = {
   // ── Likes ──────────────────────────────────────────────────────────────────
 
   // POST /posts/:postId/like
-  async likePost(postId) {
+  async likePost(postId : number | string) {
     const { data } = await apiClient.post(`/posts/${postId}/like`);
     return data; // { liked: true, likes_count: 42 }
   },
 
   // DELETE /posts/:postId/like
-  async unlikePost(postId) {
+  async unlikePost(postId : number | string) {
     const { data } = await apiClient.delete(`/posts/${postId}/like`);
     return data; // { liked: false, likes_count: 41 }
   },
@@ -19,13 +19,13 @@ const socialService = {
   // ── Comments ───────────────────────────────────────────────────────────────
 
   // GET /posts/:postId/comments
-  async getComments(postId) {
+  async getComments(postId: number | string) {
     const { data } = await apiClient.get(`/posts/${postId}/comments`);
     return data; // { comments: [] }
   },
 
   // POST /posts/:postId/comments
-  async addComment(postId, content) {
+  async addComment(postId: number | string, content: string) {
     const { data } = await apiClient.post(`/posts/${postId}/comments`, {
       content,
     });
@@ -33,7 +33,7 @@ const socialService = {
   },
 
   // DELETE /posts/:postId/comments/:commentId
-  async deleteComment(postId, commentId) {
+  async deleteComment(postId: number | string, commentId: number | string) {
     await apiClient.delete(`/posts/${postId}/comments/${commentId}`);
   },
 };

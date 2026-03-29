@@ -3,7 +3,7 @@ import apiClient from "./Apiclient";
 
 const authService = {
   // POST /auth/register
-  async signup({ username, email, password }) {
+  async signup({ username, email, password }: { username: string, email: string, password: string }) {
     const { data } = await apiClient.post("/auth/register", {
       username,
       email,
@@ -14,7 +14,7 @@ const authService = {
   },
 
   // POST /auth/login  — FastAPI OAuth2 expects form-encoded body
-  async login({ email, password }) {
+  async login({ email, password } : { email: string, password: string }) {
     const form = new URLSearchParams();
     form.append("username", email); // FastAPI OAuth2 uses "username" field
     form.append("password", password);
@@ -46,9 +46,14 @@ const authService = {
   },
 };
 
-function _saveTokens({ access_token, refresh_token }) {
+function _saveTokens({ access_token, refresh_token } : { access_token: string, refresh_token: string }) {
   if (access_token) localStorage.setItem("access_token", access_token);
   if (refresh_token) localStorage.setItem("refresh_token", refresh_token);
 }
+
+// forgotPassword: async (email: string) => {
+//   const response = await apiClient.post("/auth/forgot-password", { email });
+//   return response.data;
+// },
 
 export default authService;

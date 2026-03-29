@@ -11,13 +11,13 @@ const postService = {
   },
 
   // GET /posts/:id
-  async getPost(postId) {
+  async getPost(postId: number | string) {
     const { data } = await apiClient.get(`/posts/${postId}`);
     return data;
   },
 
   // POST /posts  — supports image upload via FormData
-  async createPost({ content, image }) {
+  async createPost({ content, image }: { content: string, image?: File }) {
     if (image) {
       const form = new FormData();
       form.append("content", content);
@@ -32,12 +32,12 @@ const postService = {
   },
 
   // DELETE /posts/:id
-  async deletePost(postId) {
+  async deletePost(postId: number | string) {
     await apiClient.delete(`/posts/${postId}`);
   },
 
   // GET /users/:userId/posts
-  async getUserPosts(userId) {
+  async getUserPosts(userId: number | string) {
     const { data } = await apiClient.get(`/users/${userId}/posts`);
     return data;
   },

@@ -1,62 +1,63 @@
-import { useMutation } from "@tanstack/react-query"
-import { login, register, forgotPassword } from "../api/Authservice"
+import { useMutation } from "@tanstack/react-query";
+import authService from "../api/Authservice"; // ✅ default import, not named
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface LoginPayload {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 interface RegisterPayload {
-  username: string
-  email: string
-  password: string
+  username: string;
+  email: string;
+  password: string;
 }
 
 interface ForgotPasswordPayload {
-  email: string
+  email: string;
+}
+
+interface AuthResponse {
+  access_token?: string;
+  [key: string]: unknown;
 }
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
 export const useLogin = () => {
-  return useMutation({
+  return useMutation<AuthResponse, unknown, LoginPayload>({
     mutationFn: ({ email, password }: LoginPayload) =>
-      login(email, password),
+      authService.login({ email, password }),
 
-    onSuccess: (data) => {
-      localStorage.setItem("token", data.access_token)
+    onSuccess: (data: AuthResponse) => {
+      if (data?.access_token) {
+        localStorage.setItem("token", data.access_token);
+      }
     },
-  })
-}
+  });
+};
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 
 export const useRegister = () => {
-  return useMutation({
+  return useMutation<AuthResponse, unknown, RegisterPayload>({
     mutationFn: (payload: RegisterPayload) =>
-      register(payload),
+      authService.signup(payload),
 
-    onSuccess: (data) => {
-      // Automatically log the user in after successful registration
-      // if the API returns a token; otherwise leave token unset so
-      // the user is redirected to /login manually.
+    onSuccess: (data: AuthResponse) => {
       if (data?.access_token) {
-        localStorage.setItem("token", data.access_token)
+        localStorage.setItem("token", data.access_token);
       }
     },
-  })
-}
+  });
+};
 
 // ─── Forgot Password ──────────────────────────────────────────────────────────
 
 export const useForgotPassword = () => {
-  return useMutation({
+  return useMutation<unknown, unknown, ForgotPasswordPayload>({
     mutationFn: ({ email }: ForgotPasswordPayload) =>
-      forgotPassword(email),
-
-    // No token to store — API sends a reset link to the user's email.
-    // The component can check `isSuccess` to show a confirmation message.
-  })
-}
+      authService.forgotPassword(email),
+  });
+};

@@ -1,4 +1,3 @@
-// src/hooks/usePosts.js
 import {
   useInfiniteQuery,
   useMutation,
@@ -8,97 +7,113 @@ import {
 import postService from "../api/Postservice";
 import socialService from "../api/Socialservice";
 
-// ─── Query Keys (centralised so invalidation is consistent) ──────────────────
-export const postKeys = {
-  all: ["posts"],
-  feed: (page) => ["posts", "feed", page],
-  detail: (id) => ["posts", id],
-  userPosts: (userId) => ["posts", "user", userId],
-};
-
-// ─── Feed with infinite scroll ───────────────────────────────────────────────
-export function useFeed() {
-  return useInfiniteQuery({
-    queryKey: postKeys.all,
-    queryFn: ({ pageParam }) => postService.getFeed({ page: pageParam as number }),
-    initialPageParam: 1,                        // ← this was missing, required in v5
-    getNextPageParam: (lastPage: any) =>
-      lastPage.has_more ? lastPage.page + 1 : undefined,
-    staleTime: 1000 * 30,
-  });
+export interface Post {
+  id: number | string
+  content: string
+  likes_count?: number
+  liked?: boolean
+  user?: { username: string }
 }
 
-// ─── Single post ─────────────────────────────────────────────────────────────
-export function usePost(postId) {
-  return useQuery({
+interface FeedResponse {
+  posts: Post[]
+  page: number
+  has_more: boolean
+}
+
+export const postKeys = {
+  all: ["posts"] as const,
+  feed: (page: number) => ["posts", "feed", page] as const,
+  detail: (id: number | string) => ["posts", id] as const,
+  userPosts: (userId: number | string) => ["posts", "user", userId] as const,
+}
+
+export function useFeed() {
+  return useInfiniteQuery<FeedResponse>({
+    queryKey: postKeys.all,
+    queryFn: ({ pageParam = 1 }) =>
+      postService.getFeed({ page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.has_more ? lastPage.page + 1 : undefined,
+    staleTime: 1000 * 30,
+  })
+}
+
+export function usePost(postId: number | string) {
+  return useQuery<Post>({
     queryKey: postKeys.detail(postId),
     queryFn: () => postService.getPost(postId),
     enabled: !!postId,
-  });
+  })
 }
 
-// ─── User's posts ─────────────────────────────────────────────────────────────
-export function useUserPosts(userId) {
-  return useQuery({
+export function useUserPosts(userId: number | string) {
+  return useQuery<Post[]>({
     queryKey: postKeys.userPosts(userId),
     queryFn: () => postService.getUserPosts(userId),
     enabled: !!userId,
-  });
+  })
 }
 
-// ─── Create post ─────────────────────────────────────────────────────────────
 export function useCreatePost() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: postService.createPost,
     onSuccess: () => {
-      // Invalidate feed so new post appears immediately
-      queryClient.invalidateQueries({ queryKey: postKeys.all });
+      queryClient.invalidateQueries({ queryKey: postKeys.all })
     },
-  });
+  })
 }
 
-// ─── Delete post ─────────────────────────────────────────────────────────────
 export function useDeletePost() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: postService.deletePost,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: postKeys.all });
+      queryClient.invalidateQueries({ queryKey: postKeys.all })
     },
-  });
+  })
 }
 
-// ─── Like / Unlike with optimistic update ────────────────────────────────────
-export function useLikePost(postId) {
-  const queryClient = useQueryClient();
+export function useLikePost(postId: number | string) {
+  const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ liked }) =>
-      liked ? socialService.unlikePost(postId) : socialService.likePost(postId),
+    mutationFn: ({ liked }: { liked: boolean }) =>
+      liked
+        ? socialService.unlikePost(postId)
+        : socialService.likePost(postId),
 
-    // Immediately flip the UI before the request completes
-    onMutate: async ({ liked }) => {
-      await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) });
-      const previous = queryClient.getQueryData(postKeys.detail(postId));
+    onMutate: async ({ liked }: { liked: boolean }) => {
+      await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) })
 
-      queryClient.setQueryData(postKeys.detail(postId), (old) => ({
-        ...old,
-        liked: !liked,
-        likes_count: liked ? old.likes_count - 1 : old.likes_count + 1,
-      }));
+      const previous = queryClient.getQueryData<Post>(postKeys.detail(postId))
 
-      return { previous };
+      queryClient.setQueryData<Post>(postKeys.detail(postId), (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          liked: !liked,
+          likes_count: liked
+            ? (old.likes_count ?? 0) - 1
+            : (old.likes_count ?? 0) + 1,
+        }
+      })
+
+      return { previous }
     },
 
-    // Roll back on error
     onError: (_err, _vars, context) => {
-      queryClient.setQueryData(postKeys.detail(postId), context.previous);
+      if (context?.previous) {
+        queryClient.setQueryData(postKeys.detail(postId), context.previous)
+      }
     },
 
-    // Always sync with server truth
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
+      queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) })
     },
-  });
+  })
 }

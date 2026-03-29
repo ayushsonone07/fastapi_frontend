@@ -2,10 +2,17 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// ✅ Defined outside the component to avoid circular reference
+interface RegisterForm {
+  username: string;
+  email: string;
+  password: string;
+}
+
 export default function Register() {
   const { signup } = useAuth();
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<RegisterForm>({
     username: "",
     email: "",
     password: "",
@@ -22,10 +29,7 @@ export default function Register() {
     setError(null);
     setLoading(true);
     try {
-      if (!signup) {
-        throw new Error("Signup function not available");
-      }
-      await (signup as (form: typeof form) => Promise<void>)(form); // navigates to "/" automatically via AuthContext
+      await signup(form); // ✅ no cast needed — AuthContext types signup correctly
     } catch (err: any) {
       setError(err.response?.data?.detail ?? "Registration failed. Try again.");
     } finally {
