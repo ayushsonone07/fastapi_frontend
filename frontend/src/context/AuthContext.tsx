@@ -3,7 +3,15 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../api/Authservice";
 
-const AuthContext = createContext(null);
+interface AuthContextType {
+  user: any;
+  loading: boolean;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
+  signup: (info: any) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
