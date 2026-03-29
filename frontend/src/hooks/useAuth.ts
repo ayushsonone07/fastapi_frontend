@@ -14,9 +14,9 @@ interface RegisterPayload {
   password: string;
 }
 
-interface ForgotPasswordPayload {
-  email: string;
-}
+// interface ForgotPasswordPayload {
+//   email: string;
+// }
 
 interface AuthResponse {
   access_token?: string;
