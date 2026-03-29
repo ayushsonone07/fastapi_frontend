@@ -9,9 +9,8 @@ app = FastAPI(title="Social Media API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:5173",                    # Vite dev server
+    "https://expert-journey-wjx54pvqgjqcxwg-5173.app.github.dev",                    # Vite dev server
     "https://social-frontend-eta.vercel.app",         # your deployed frontend
-    "https://vm-p1nt2yf09m2pn6wjzagnr8.vusercontent.net",
     ],
     allow_credentials=True,
     allow_methods=["*"],
