@@ -1,13 +1,13 @@
 // src/hooks/useComments.js
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import socialService from "../api/socialService";
+import socialService from "../api/Socialservice";
 
 export const commentKeys = {
-  all: (postId) => ["comments", postId],
+  all: (postId: number | string) => ["comments", postId],
 };
 
 // ─── Get comments for a post ──────────────────────────────────────────────────
-export function useComments(postId) {
+export function useComments(postId: number | string) {
   return useQuery({
     queryKey: commentKeys.all(postId),
     queryFn: () => socialService.getComments(postId),
@@ -17,13 +17,13 @@ export function useComments(postId) {
 }
 
 // ─── Add comment with optimistic update ──────────────────────────────────────
-export function useAddComment(postId) {
+export function useAddComment(postId: number | string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (content) => socialService.addComment(postId, content),
+    mutationFn: (content: string) => socialService.addComment(postId, content),
 
-    onMutate: async (content) => {
+    onMutate: async (content: string) => {
       await queryClient.cancelQueries({ queryKey: commentKeys.all(postId) });
       const previous = queryClient.getQueryData(commentKeys.all(postId));
 
@@ -36,7 +36,7 @@ export function useAddComment(postId) {
         _optimistic: true,
       };
 
-      queryClient.setQueryData(commentKeys.all(postId), (old) => ({
+      queryClient.setQueryData(commentKeys.all(postId), (old: any | undefined) => ({
         ...old,
         comments: [...(old?.comments ?? []), optimistic],
       }));
@@ -45,7 +45,7 @@ export function useAddComment(postId) {
     },
 
     onError: (_err, _vars, context) => {
-      queryClient.setQueryData(commentKeys.all(postId), context.previous);
+      queryClient.setQueryData(commentKeys.all(postId), context?.previous);
     },
 
     onSettled: () => {
@@ -55,11 +55,11 @@ export function useAddComment(postId) {
 }
 
 // ─── Delete comment ───────────────────────────────────────────────────────────
-export function useDeleteComment(postId) {
+export function useDeleteComment(postId: number | string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (commentId) => socialService.deleteComment(postId, commentId),
+    mutationFn: (commentId: number | string) => socialService.deleteComment(postId, commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: commentKeys.all(postId) });
     },

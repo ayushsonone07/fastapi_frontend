@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }) {
+export function AuthProvider({ children } : { children: React.ReactNode }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); // true while checking session
   const navigate = useNavigate();
@@ -35,13 +35,13 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  async function login(credentials) {
+  async function login(credentials: { email: string; password: string }) {
     const userData = await authService.login(credentials);
     setUser(userData);
     navigate("/");
   }
 
-  async function signup(info) {
+  async function signup(info: { email: string; password: string; username: string }) {
     const userData = await authService.signup(info);
     setUser(userData);
     navigate("/");

@@ -31,13 +31,13 @@ export const postKeys = {
 export function useFeed() {
   return useInfiniteQuery<FeedResponse>({
     queryKey: postKeys.all,
-    queryFn: ({ pageParam = 1 }) =>
-      postService.getFeed({ page: pageParam }),
+    queryFn: ({ pageParam }) =>
+      postService.getFeed({ page: pageParam as number }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.page + 1 : undefined,
     staleTime: 1000 * 30,
-  })
+  });
 }
 
 export function usePost(postId: number | string) {
