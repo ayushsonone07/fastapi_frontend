@@ -16,17 +16,30 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+  
     try {
       await login(form);
-    } catch (err: unknown) {
-      const msg =
-        (err as any)?.response?.data?.detail ?? "Login failed. Check your credentials.";
+    } catch (err: any) {
+      let msg = "Login failed. Check your credentials.";
+  
+      if (err?.response?.data?.detail) {
+        const detail = err.response.data.detail;
+  
+        if (typeof detail === "string") {
+          msg = detail;
+        } else if (Array.isArray(detail)) {
+          msg = detail.map((d: any) => d.msg).join(", ");
+        } else {
+          msg = JSON.stringify(detail);
+        }
+      }
+  
       setError(msg);
     } finally {
       setLoading(false);
     }
   }
-
+  
   return (
     <>
       <style>{`
