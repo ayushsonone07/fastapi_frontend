@@ -59,5 +59,5 @@ export const useRegister = () => {
 //   return useMutation<unknown, unknown, ForgotPasswordPayload>({
 //     mutationFn: ({ email }: ForgotPasswordPayload) =>
 //       authService.forgotPassword(email),
-//   });
+  // });
 // };
