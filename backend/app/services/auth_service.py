@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.core.security import hash_password, verify_password
-
+from app.models.user import User  
+from sqlalchemy.orm import Session
 
 def create_user(db: Session, username: str, email: str, password: str):
     user = User(
@@ -24,4 +25,6 @@ def authenticate_user(db: Session, email: str, password: str):
     if not verify_password(password, user.password):
         return None
 
+def get_user_by_id(db: Session, user_id: int):
+    return db.query(User).filter(User.id == user_id).first()
     return user
