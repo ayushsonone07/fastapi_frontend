@@ -1,6 +1,6 @@
+from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from fastapi import Depends
-from sqlalchemy.orm import Session
 from app.core.security import decode_token
 from app.services.auth_service import get_user_by_id
 
@@ -11,7 +11,7 @@ def get_db():
     finally:
         db.close()
 
-def get_current_user(authorization: str = None, db: session = Depends(get_db)):
+def get_current_user(authorization: str = None, db: Session = Depends(get_db)):
     if not authorization:
         raise HTTPException(status_code=401, detail = "no authorization header")
 
