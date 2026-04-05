@@ -6,10 +6,14 @@ from app.core.dependencies import get_db
 
 router = APIRouter()
 
-
 @router.post("/posts")
-def new_post(post: PostCreate, db: Session = Depends(get_db)):
-    return create_post(db, post.content, 1)
+def new_post(
+    post: PostCreate, 
+    db: Session = Depends(get_db),
+    authorization: str = Header(None)
+):
+    current_user = get_current_user(authorization, db)
+    return create_post(db, post.content, current_user.user_id)
 
 
 @router.get("/posts")
