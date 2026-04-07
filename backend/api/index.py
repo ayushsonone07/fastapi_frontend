@@ -9,3 +9,6 @@ from dotenv import load_dotenv
 load_dotenv(env_path)
 
 from app.main import app
+from mangum import Mangum
+
+handler = Mangum(app)  # ← THIS is what Vercel calls
