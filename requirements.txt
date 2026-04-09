@@ -4,6 +4,7 @@ mangum
 sqlalchemy
 pydantic
 pydantic[email]
+email-validator==2.1.0
 pydantic-settings
 bcrypt==4.0.1
 passlib[bcrypt]
