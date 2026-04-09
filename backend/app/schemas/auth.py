@@ -1,22 +1,26 @@
 from __future__ import annotations
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
-
+import re
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str = Field(..., min_length=8)
 
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", v):
+            raise ValueError('Invalid email address')
+        return v.lower().strip()
 
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
 
-
 class RefreshRequest(BaseModel):
     refresh_token: str
-
 
 class UserResponse(BaseModel):
     id: int
@@ -28,7 +32,6 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
 
 class MessageResponse(BaseModel):
     detail: str
